@@ -30,14 +30,14 @@ while ($row = $result->fetch_assoc()) {
     }
 
     fputcsv($output, [
-        $row['org_type'],
-        $row['org_name'],
-        $row['org_address'],
-        $row['contact_person'],
+        $row['role'],
+        $row['name'],
+        $row['address'],
+        $row['contact'],
         $row['phone'],
         $row['email'],
         $formattedDishes,
-        $row['donation_date'],
+        $row['donation_datetime'],
         $row['instructions'],
         $row['submitted_at']
     ]);
