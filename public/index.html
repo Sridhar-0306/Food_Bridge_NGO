@@ -729,7 +729,7 @@ document.getElementById("review-btn").addEventListener("click", function () {
   console.log("Sending Payload:", payload);
 
   try {
-    const response = await fetch("https://ngo-donation-system.onrender.com/backend/submit_donation.php", {
+  fetch("https://food-bridge-ngo.onrender.com/backend/submit_donation.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
