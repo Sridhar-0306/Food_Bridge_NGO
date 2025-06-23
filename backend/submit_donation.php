@@ -6,29 +6,34 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 require 'connect.php';
 
-// Read JSON
+// Read JSON input
 $data = json_decode(file_get_contents("php://input"), true);
 
+// Validate input
 if (!$data) {
     echo json_encode(["error" => "Invalid JSON data"]);
     exit;
 }
 
-// Extract fields
-$org_type = $conn->real_escape_string($data['org_type'] ?? '');
-$org_name = $conn->real_escape_string($data['org_name'] ?? '');
-$org_address = $conn->real_escape_string($data['org_address'] ?? '');
-$contact_person = $conn->real_escape_string($data['contact_person'] ?? '');
+// Extract and sanitize fields
+$role = $conn->real_escape_string($data['org_type'] ?? '');
+$name = $conn->real_escape_string($data['org_name'] ?? '');
+$address = $conn->real_escape_string($data['org_address'] ?? '');
+$contact = $conn->real_escape_string($data['contact_person'] ?? '');
 $phone = $conn->real_escape_string($data['phone'] ?? '');
 $email = $conn->real_escape_string($data['email'] ?? '');
-$dishes = $conn->real_escape_string(json_encode($data['dishes'] ?? []));
-$donation_date = $conn->real_escape_string($data['donation_date'] ?? '');
 $instructions = $conn->real_escape_string($data['instructions'] ?? '');
+$dishes = $conn->real_escape_string(json_encode($data['dishes'] ?? []));
+$donation_datetime = $conn->real_escape_string($data['donation_date'] ?? date('Y-m-d H:i:s'));
 
-// Save to DB
-$sql = "INSERT INTO system (org_type, org_name, org_address, contact_person, phone, email, dishes, donation_date, instructions)
-        VALUES ('$org_type', '$org_name', '$org_address', '$contact_person', '$phone', '$email', '$dishes', '$donation_date', '$instructions')";
+// Insert into database
+$sql = "INSERT INTO system (
+    role, name, address, contact, phone, email, instructions, dishes, donation_datetime
+) VALUES (
+    '$role', '$name', '$address', '$contact', '$phone', '$email', '$instructions', '$dishes', '$donation_datetime'
+)";
 
+// Execute query
 if ($conn->query($sql)) {
     echo json_encode(["status" => "success"]);
 } else {
