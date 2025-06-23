@@ -9,10 +9,10 @@ $output = fopen('php://output', 'w');
 // CSV Headers
 fputcsv($output, [
     'Org Type', 'Org Name', 'Address', 'Contact Person', 'Phone',
-    'Email', 'Dishes (Readable)', 'Preferred Date/Time', 'Instructions', 'Submitted At'
+    'Email', 'Dishes (Full Info)', 'Pickup Time', 'Instructions', 'Submitted At', 'Status'
 ]);
 
-// Fetch from DB
+// Fetch all records — nothing filtered or deleted
 $result = $conn->query("SELECT * FROM system ORDER BY submitted_at DESC");
 
 while ($row = $result->fetch_assoc()) {
@@ -22,7 +22,11 @@ while ($row = $result->fetch_assoc()) {
     if (is_array($decodedDishes)) {
         $index = 1;
         foreach ($decodedDishes as $dish) {
-            $formattedDishes .= "{$index}. {$dish['name']} ({$dish['type']}, Qty: {$dish['quantity']}, Packing: {$dish['packing']}, Exp: {$dish['expiry']})\n";
+            $formattedDishes .= "{$index}. {$dish['name']} ({$dish['type']}, Qty: {$dish['quantity']}, Packing: {$dish['packing']}, Exp: {$dish['expiry']}";
+            if (!empty($dish['description'])) {
+                $formattedDishes .= ", Desc: {$dish['description']}";
+            }
+            $formattedDishes .= ")\n";
             $index++;
         }
     } else {
@@ -37,9 +41,10 @@ while ($row = $result->fetch_assoc()) {
         $row['phone'],
         $row['email'],
         $formattedDishes,
-        $row['donation_datetime'],
+        $row['pickup_time'],
         $row['instructions'],
-        $row['submitted_at']
+        $row['submitted_at'],
+        $row['is_picked'] ? 'Picked' : 'Pending'
     ]);
 }
 
