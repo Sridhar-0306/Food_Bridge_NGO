@@ -111,7 +111,7 @@ $now = new DateTime();
             }
           ?>
         </td>
-        <td><?= htmlspecialchars($row['pickup_time']) ?></td>
+        <td><?= $row['pickup_time'] ? htmlspecialchars($row['pickup_time']) : '' ?></td>
         <td><?= nl2br(htmlspecialchars($row['instructions'])) ?></td>
         <td><?= $row['is_picked'] ? '<span class="picked">Picked</span>' : 'Pending' ?></td>
         <td>
