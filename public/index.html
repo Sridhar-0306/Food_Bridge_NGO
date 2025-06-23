@@ -707,23 +707,24 @@ document.getElementById("review-btn").addEventListener("click", function () {
   }
 
   const payload = {
-    org_type: formData.organization.type,
-    org_name: formData.organization.name,
-    org_address: formData.organization.address,
-    contact_person: formData.organization.contactPerson,
-    phone: formData.organization.phone,
-    email: formData.organization.email,
-    dishes: formData.donation.items.map(item => ({
-      name: item.name,
-      type: item.type,
-      quantity: item.quantity,
-      description: item.description,
-      packing: item.packaging,
-      expiry: item.expiry,
-    })),
-    donation_date: new Date().toISOString(),
-    instructions: formData.donation.instructions
-  };
+  org_type: formData.organization.type,
+  org_name: formData.organization.name,
+  org_address: formData.organization.address,
+  contact_person: formData.organization.contactPerson,
+  phone: formData.organization.phone,
+  email: formData.organization.email,
+  dishes: formData.donation.items.map(item => ({
+    name: item.name,
+    type: item.type,
+    quantity: item.quantity,
+    description: item.description,
+    packing: item.packaging,
+    expiry: item.expiry,
+  })),
+  donation_date: new Date().toISOString(),
+  pickup_time: new Date().toISOString(),   // ✅ added
+  instructions: formData.donation.instructions
+};
 
   console.log("Sending Payload:", payload);
 
