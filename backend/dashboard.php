@@ -18,7 +18,7 @@ $where = "WHERE 1=1";
 if ($filter === 'picked') {
     $where .= " AND is_picked = 1";
 } elseif ($filter === 'active') {
-    $where .= " AND is_picked = 0 AND donation_date > NOW()";
+    $where .= " AND is_picked = 0 AND donation_datetime > NOW()";
 }
 
 // Count total rows
@@ -67,16 +67,16 @@ $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC L
       <th>Phone</th>
       <th>Email</th>
       <th>Dishes</th>
-      <th>food pickup Time</th>
+      <th>Pickup Time</th>
       <th>Instructions</th>
       <th>Status</th>
       <th>Action</th>
     </tr>
     <?php while ($row = $result->fetch_assoc()): ?>
     <tr>
-      <td><?= htmlspecialchars($row['org_name']) ?> (<?= $row['org_type'] ?>)</td>
-      <td><?= htmlspecialchars($row['org_address']) ?></td>
-      <td><?= htmlspecialchars($row['contact_person']) ?></td>
+      <td><?= htmlspecialchars($row['name']) ?> (<?= $row['role'] ?>)</td>
+      <td><?= htmlspecialchars($row['address']) ?></td>
+      <td><?= htmlspecialchars($row['contact']) ?></td>
       <td><?= htmlspecialchars($row['phone']) ?></td>
       <td><?= htmlspecialchars($row['email']) ?></td>
       <td>
@@ -93,7 +93,7 @@ $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC L
           }
         ?>
       </td>
-      <td><?= $row['donation_date'] ?></td>
+      <td><?= htmlspecialchars($row['donation_datetime']) ?></td>
       <td><?= htmlspecialchars($row['instructions']) ?></td>
       <td><?= $row['is_picked'] ? '<span class="picked">Picked</span>' : 'Pending' ?></td>
       <td>
