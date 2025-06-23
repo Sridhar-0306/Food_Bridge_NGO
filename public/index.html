@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Donation Network</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #040404;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 0 20px;
+            padding-top: 420px;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .circle-img {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 2s ease-in-out;
+            animation: grow 2s ease-in-out 2s forwards;
+            object-fit: cover;
+        }
+
+        @keyframes grow {
+            to {
+                transform: translate(-50%, -50%) scale(10);
+            }
+        }
+
+        .landing-content h3 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 550;
+            color: darkgoldenrod;
+        }
+
+        .landing-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: darkgoldenrod;
+        }
+
+        /* Login Page Styles */
+        .login-page {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.921);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .login-page.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .login-container {
+            background-color: rgba(26, 26, 26, 0.999);
+            padding: 40px;
+            border-radius: 10px;
+            border: 2px solid darkgoldenrod;
+            box-shadow: 0 0 10px darkgoldenrod;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: darkgoldenrod;
+        }
+
+        /* User Type Selection Styles */
+        .user-type-page {
+            background-color: #000000;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .user-type-container {
+            background-color: rgba(26, 26, 26, 0.999);
+            border-radius: 20px;
+            border: 2px solid darkgoldenrod;
+            box-shadow: 0 0 10px darkgoldenrod;
+            padding: 30px;
+            max-width: 1300px;
+            height: 550px;
+            margin: 0 auto ;
+            
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-type-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: darkgoldenrod;
+        }
+
+        .user-type-contents {
+            display: flex;
+            justify-content: space-between;
+            
+        }
+
+        .user-type-option {
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;     
+            padding: 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            margin-left: 30px;
+            margin-top: 50px;
+            background-color: #000000;
+            height: 200px;
+            width: 250px;
+            transition: transform 0.3s ease; 
+            position: relative;
+        }
+
+        .user-type-option:hover {
+            background-color: #0a0a0a98;
+            transform: translateY(-20px);
+            border: 2px solid darkgoldenrod;
+            box-shadow: 0 0 10px darkgoldenrod;
+        }
+
+        .user-type-option h2 {
+            color: rgb(173, 173, 3);
+            margin-bottom: 5px;
+        }
+
+        .user-type-option p {
+            color: rgb(173, 173, 3);
+        }
+
+        .next {
+            width: 110px;
+            height: 50px;
+            background-color: darkgoldenrod;
+            color: #000000;
+            margin-left: 1000px;
+            margin-top: 50px;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .next:hover {
+            background-color: rgb(97, 75, 20);
+        }
+
+        .signed-in-as {
+            text-align: center;
+            color: darkgoldenrod;
+            font-style: italic;
+            margin-top:50px;
+        }
+
+        .form-wrapper {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 700px;
+            margin: auto;
+            margin-top: 50px;
+            margin-bottom: 55px;
+            border: 2px solid darkgoldenrod;
+            box-shadow: 0 0 10px darkgoldenrod;
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #222;
+            color: #fff;
+        }
+
+        button {
+            background: darkgoldenrod;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: rgb(97, 75, 20);
+        }
+
+        .review-info {
+            color: #f0e68c; /* light goldenrod (change as needed) */
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 10px;
+            border: 1px solid darkgoldenrod;
+            border-radius: 8px;
+            background-color: #121212;
+            margin-bottom: 20px;
+          }
+
+          .review-info p,
+          .review-info h4 {
+            color: rgb(255, 255, 255);
+          }
+
+
+        .terms-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: darkgoldenrod;
+          }
+
+          .terms-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: darkgoldenrod;
+            cursor: pointer;
+            margin-bottom: 4px;
+          }
+
+
+        h2, h3 {
+            color: darkgoldenrod;
+        }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .progress-steps {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .step {
+                flex-direction: row;
+                align-items: center;
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+            .step-circle {
+                margin-right: 10px;
+                margin-bottom: 0;
+            }
+
+            .progress-steps::before {
+                display: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        h4 {
+          color: rgb(169, 123, 38); /* or darkgoldenrod */
+        }
+
+        label {
+          color: rgb(169, 123, 38); /* or any other color */
+          font-weight: 300;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div class="landing-page" id="landing-page">
+        <img src="background 1.jpg" alt="Food" class="circle-img" id="circle">
+        <div class="landing-content">
+            <p>No one has ever become poor by giving.</p>
+            <h3>Take part in the noble journey</h3>
+            <p>Your leftovers can be someone's lifeline.</p>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div class="login-page" id="login-page">
+        <div class="login-container">
+            <h2>Sign in to continue</h2>
+            <!-- Google Sign-In Button -->
+            <div id="g_id_onload"
+                data-client_id="64970627307-26ppc5i8n1f0rm4pumj1gb33poirjj7n.apps.googleusercontent.com"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin"
+                data-type="standard"
+                data-size="large"
+                data-theme="outline"
+                data-text="sign_in_with"
+                data-shape="rectangular"
+                data-logo_alignment="left">
+            </div>
+        </div>
+    </div>
+
+    <!-- User Type Selection -->
+    <div class="user-type-page" id="user-type-page">
+        <div class="user-type-container">
+            <h1>Who You Are</h1>
+            <div class="user-type-contents">
+            <div class="user-type-option" data-type="restaurant">
+                <h2>Restaurants</h2>
+                <p>Explore Restaurants</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="user-type-option" data-type="catering">
+                <h2>Catering / Mandapam</h2>
+                <p>Explore Catering / Mandapam</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="user-type-option" data-type="college">
+                <h2>Colleges</h2>
+                <p>Explore Colleges</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="user-type-option" data-type="school">
+                <h2>Schools</h2>
+                <p>Explore Schools</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="user-type-option" data-type="organization">
+                <h2>Organizations</h2>
+                <p>Explore Organizations</p>
+            </div>
+        </div>
+
+            <div class="nxt-but" id="next-button">
+                <button class="next">Next &#10140</button>
+            </div>
+
+            <div class="signed-in-as">Signed in as </div>
+            
+        </div>
+    </div>
+    
+    <!-- Donation form -->
+<div class="form-wrapper" id="form-wrapper" style="display: none;">
+    <h2>Donate Surplus Food</h2>
+
+    <!-- Step 1 -->
+    <div class="step active" id="step-1">
+      <h3>Who Are You?</h3>
+      <select id="orgType">
+        <option value="Restaurant">Restaurant</option>
+        <option value="Catering">Catering</option>
+        <option value="College">College</option>
+        <option value="Hostel">Hostel</option>
+        <option value="Event">Event Organizer</option>
+      </select>
+
+      <h3>Organization Details</h3>
+      <input type="text" id="orgName" placeholder="Organization Name" />
+      <input type="text" id="orgAddress" placeholder="Address" />
+      <input type="text" id="contactPerson" placeholder="Contact Person" />
+      <input type="tel" id="orgPhone" placeholder="Phone Number" />
+      <input type="email" id="orgEmail" placeholder="Email" />
+      <button id="step1-next">Next</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step" id="step-2" data-step="2">
+    <h3>Food Donation Details</h3>
+
+    <div id="food-items-container"></div>
+
+    <button id="add-food-item" type="button">+ Add More Item</button>
+
+<h3>Special Instructions</h3>
+<textarea id="instructions" placeholder="Special Instructions (optional)"></textarea>
+
+
+    <div style="margin-top: 20px;">
+        <button id="step2-prev" type="button">← Back</button>
+        <button id="review-btn" type="button">Review</button>
+    </div>
+    </div>
+
+
+    <!-- Step 3 -->
+    <div class="step" id="step-3">
+      <h3>Review & Submit</h3>
+      <div id="reviewBox" class="review-info">
+        <div id="confirmation-org-details"></div>
+        <div id="confirmation-food-details"></div>
+      </div>
+      <div class="terms-container">
+        <label for="agree-terms">
+          <input type="checkbox" id="agree-terms" />
+          I agree to the terms & conditions
+        </label>
+      </div>
+      <button id="submit-donation">Submit Donation</button>
+    </div>
+  </div>
+
+
+<script>
+  // Google Sign-In callback
+  function handleCredentialResponse(response) {
+    const data = jwt_decode(response.credential);
+    console.log("User Info:", data);
+
+    document.querySelector('.signed-in-as').textContent = `Signed in as ${data.name}`;
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('user-type-page').style.display = 'block';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const landingPage = document.getElementById('landing-page');
+    const loginPage = document.getElementById('login-page');
+    const userTypePage = document.getElementById('user-type-page');
+    const donorContainer = document.getElementById('donor-container');
+    const foodItemsContainer = document.getElementById('food-items-container');
+    const addFoodItemBtn = document.getElementById('add-food-item');
+
+    setTimeout(() => {
+  landingPage.style.display = 'none';
+  loginPage.style.display = 'flex'; // <--- ADD THIS LINE
+  loginPage.classList.add('show');
+}, 4000);
+
+document.getElementById("next-button").addEventListener("click", function () {
+    document.getElementById("user-type-page").style.display = "none";
+    document.getElementById("form-wrapper").style.display = "block";
+});
+
+
+    let formData = {
+      organization: {},
+      donation: { items: [] }
+    };
+
+    let currentStep = 1;
+
+    function addFoodItem() {
+      const itemId = Date.now();
+      const itemHTML = `
+        <div class="food-item" data-id="${itemId}">
+          <h4>Food Item</h4>
+          <div class="form-group">
+            <label Styles="white">Item Name*</label>
+            <input type="text" id="food-name-${itemId}" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Food Type*</label>
+              <select id="food-type-${itemId}" required>
+                <option value="">Select type</option>
+                <option value="veg">Vegetarian</option>
+                <option value="non-veg">Non-Vegetarian</option>
+                <option value="vegan">Vegan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quantity*</label>
+              <input type="number" id="food-quantity-${itemId}" min="1" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="food-description-${itemId}"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Packaging Type*</label>
+              <select id="food-packaging-${itemId}" required>
+                <option value="">Select packaging</option>
+                <option value="individual">Individual Portions</option>
+                <option value="bulk">Bulk Packaging</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Expiry/Use By</label>
+              <input type="datetime-local" id="food-expiry-${itemId}">
+            </div>
+          </div>
+          <button type="button" class="remove-item-btn" data-id="${itemId}">Remove Item</button>
+        </div>`;
+
+      foodItemsContainer.insertAdjacentHTML('beforeend', itemHTML);
+
+      document.querySelector(`.remove-item-btn[data-id="${itemId}"]`).addEventListener('click', () => {
+        document.querySelector(`.food-item[data-id="${itemId}"]`).remove();
+      });
+    }
+
+
+function showStep(stepNumber) {
+  document.querySelectorAll('.step').forEach(step => {
+    step.classList.remove('active');
+  });
+  document.getElementById(`step-${stepNumber}`).classList.add('active');
+  currentStep = stepNumber;
+}
+
+document.getElementById("step1-next").addEventListener("click", function () {
+  // Save data from Step 1
+  formData.organization = {
+    type: document.getElementById("orgType").value,
+    name: document.getElementById("orgName").value,
+    address: document.getElementById("orgAddress").value,
+    contactPerson: document.getElementById("contactPerson").value,
+    phone: document.getElementById("orgPhone").value,
+    email: document.getElementById("orgEmail").value,
+  };
+
+  // Validate Step 1
+  const fields = ["orgType", "orgName", "orgAddress", "contactPerson", "orgPhone", "orgEmail"];
+  for (const id of fields) {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) {
+      alert("Please fill all organization details.");
+      el.focus();
+      return;
+    }
+  }
+
+  showStep(2);
+});
+
+
+function nextStep() {
+  showStep(currentStep + 1);
+}
+
+function prevStep() {
+  showStep(currentStep - 1);
+}
+
+// Hook up navigation buttons
+document.getElementById("step2-prev").addEventListener("click", prevStep);
+document.getElementById("review-btn").addEventListener("click", function () {
+  if (validateStep(2)) {
+    saveStepData(2);
+    showStep(3);
+  }
+});
+
+
+
+    function prevStep() {
+      showStep(currentStep - 1);
+    }
+
+    function validateStep(stepNumber) {
+  const requiredFields = document.querySelectorAll(`#step-${stepNumber} [required]`);
+  for (let field of requiredFields) {
+    if (!field.value) {
+      alert("Please fill in all required fields");
+      field.focus();
+      return false;
+    }
+  }
+
+  if (stepNumber === 2 && document.querySelectorAll('.food-item').length === 0) {
+    alert('Please add at least one food item');
+    return false;
+  }
+
+  return true;
+}
+
+
+    function saveStepData(stepNumber) {
+      if (stepNumber === 2) {
+        formData.donation = {
+        instructions: document.getElementById('instructions').value,
+        items: []
+      };
+
+
+        const foodItems = document.querySelectorAll('.food-item');
+        foodItems.forEach(item => {
+          const id = item.getAttribute('data-id');
+          formData.donation.items.push({
+            name: document.getElementById(`food-name-${id}`).value,
+            type: document.getElementById(`food-type-${id}`).value,
+            quantity: document.getElementById(`food-quantity-${id}`).value,
+            description: document.getElementById(`food-description-${id}`).value,
+            packaging: document.getElementById(`food-packaging-${id}`).value,
+            expiry: document.getElementById(`food-expiry-${id}`).value
+          });
+        });
+      }
+    }
+
+    function updateConfirmationDetails() {
+      const org = formData.organization;
+      const donation = formData.donation;
+      let orgHTML = `
+        <p><strong>Type:</strong> ${getOrgTypeName(org?.type)}</p>
+        <p><strong>Name:</strong> ${org?.name}</p>
+        <p><strong>Address:</strong> ${org?.address}</p>
+        <p><strong>Contact:</strong> ${org?.contactPerson}</p>
+        <p><strong>Phone:</strong> ${org?.phone}</p>
+        <p><strong>Email:</strong> ${org?.email}</p>`;
+
+      let foodHTML = `
+  <p><strong>Instructions:</strong> ${donation.instructions || 'None'}</p>
+  <h4>Food Items (${donation.items.length})</h4>`;
+
+
+      donation.items.forEach(item => {
+        foodHTML += `
+          <div class="food-item-confirm">
+            <p><strong><span style="font-style: italic; text-decoration: underline; color: gold;">${item.name}</span></strong> (${item.quantity} servings)</p>
+            <p>Type: ${item.type} | Packaging: ${item.packaging}</p>
+            ${item.description ? `<p>${item.description}</p>` : ''}
+            ${item.expiry ? `<p>Use by: ${item.expiry}</p>` : ''}
+          </div>`;
+      });
+
+      document.getElementById('confirmation-org-details').innerHTML = orgHTML;
+      document.getElementById('confirmation-food-details').innerHTML = foodHTML;
+    }
+
+    function getOrgTypeName(type) {
+      switch (type) {
+        case 'school': return 'School';
+        case 'restaurant': return 'Restaurant';
+        case 'catering': return 'Catering/Mandapam';
+        case 'organization': return 'Organization';
+        default: return type;
+      }
+    }
+
+    document.getElementById('step2-prev')?.addEventListener('click', prevStep);
+
+    document.getElementById('review-btn').addEventListener('click', review);
+
+
+    function review() {
+  if (!validateStep(2)) return;
+  saveStepData(2);
+  updateConfirmationDetails();
+  showStep(3);
+}
+
+
+
+  async function submitDonation() {
+  if (!document.getElementById('agree-terms').checked) {
+    alert('Please agree to the terms and conditions');
+    return;
+  }
+
+  // Construct payload inside the function
+  const payload = {
+    org_type: formData.organization.type,
+    org_name: formData.organization.name,
+    org_address: formData.organization.address,
+    contact_person: formData.organization.contactPerson,
+    phone: formData.organization.phone,
+    email: formData.organization.email,
+    dishes: formData.donation.items.map(item => ({
+      name: item.name,
+      type: item.type,
+      quantity: item.quantity,
+      description: item.description,
+      packing: item.packaging,
+      expiry: item.expiry,
+    })),
+    donation_date: new Date().toISOString(), // Optional: or remove if unused
+    instructions: formData.donation.instructions
+  };
+
+  console.log("Sending Payload:", payload);
+
+  try {
+    const response = await fetch("https://ngo-donation-system.onrender.com/backend/submit_donation.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (result.status === "success") {
+      alert("Thank you for your donation!");
+      window.location.reload();
+    } else {
+      alert("Error: " + result.error);
+    }
+  } catch (err) {
+    alert("Failed to submit donation: " + err.message);
+  }
+}
+
+
+
+    // Initial bindings
+    addFoodItem();
+    addFoodItemBtn.addEventListener('click', addFoodItem);
+    document.getElementById('review-btn').addEventListener('click', review);
+    document.getElementById('step2-prev')?.addEventListener('click', prevStep);
+    document.getElementById('submit-donation').addEventListener('click', submitDonation);
+  });
+</script>
+
+
+
+</body>
+</html>
