@@ -29,9 +29,11 @@ $pickup_time = $conn->real_escape_string($data['pickup_time'] ?? date('Y-m-d H:i
 
 // Insert into database
 $sql = "INSERT INTO system (
-    role, name, address, contact, phone, email, instructions, dishes, donation_datetime
+    role, name, address, contact, phone, email, instructions,
+    dishes, donation_datetime, pickup_time
 ) VALUES (
-    '$role', '$name', '$address', '$contact', '$phone', '$email', '$instructions', '$dishes', '$donation_datetime'
+    '$role', '$name', '$address', '$contact', '$phone', '$email', '$instructions',
+    '$dishes', '$donation_datetime', '$pickup_time'
 )";
 
 // Execute query
