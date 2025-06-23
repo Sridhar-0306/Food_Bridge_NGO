@@ -14,19 +14,18 @@ $offset = ($page - 1) * $limit;
 $filter = $_GET['filter'] ?? 'active';
 $where = "WHERE 1=1";
 
-// Filter logic
+// Filter logic (picked/unpicked only; expiry handled below)
 if ($filter === 'picked') {
     $where .= " AND is_picked = 1";
 } elseif ($filter === 'active') {
-    $where .= " AND is_picked = 0 AND donation_datetime > NOW()";
+    $where .= " AND is_picked = 0";
 }
 
-// Count total rows
-$total = $conn->query("SELECT COUNT(*) as cnt FROM system $where")->fetch_assoc()['cnt'];
-$pages = ceil($total / $limit);
-
 // Fetch donations
-$result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC LIMIT $limit OFFSET $offset");
+$result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC");
+
+// Current datetime for expiry check
+$now = new DateTime();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,7 +37,7 @@ $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC L
     body { background: #111; color: #fff; font-family: Arial; padding: 20px; }
     h2 { color: gold; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #444; padding: 10px; text-align: left; }
+    th, td { border: 1px solid #444; padding: 10px; text-align: left; vertical-align: top; }
     th { background: #222; color: gold; }
     tr:nth-child(even) { background: #1e1e1e; }
     .picked { color: lime; font-weight: bold; }
@@ -73,38 +72,57 @@ $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC L
       <th>Action</th>
     </tr>
     <?php while ($row = $result->fetch_assoc()): ?>
-    <tr>
-      <td><?= htmlspecialchars($row['name']) ?> (<?= $row['role'] ?>)</td>
-      <td><?= htmlspecialchars($row['address']) ?></td>
-      <td><?= htmlspecialchars($row['contact']) ?></td>
-      <td><?= htmlspecialchars($row['phone']) ?></td>
-      <td><?= htmlspecialchars($row['email']) ?></td>
-      <td>
-        <?php
-          $dishes = json_decode($row['dishes'], true);
-          if (is_array($dishes)) {
+      <?php
+        // Decode dishes
+        $dishes = json_decode($row['dishes'], true);
+        $skip = false;
+
+        // Check for expired items
+        if (is_array($dishes)) {
             foreach ($dishes as $dish) {
-              echo htmlspecialchars($dish['name']) . " (" .
-                   htmlspecialchars($dish['quantity']) . ") - " .
-                   str_replace("T", " ", htmlspecialchars($dish['expiry'])) . "<br>";
+                if (!empty($dish['expiry'])) {
+                    $expiry = DateTime::createFromFormat('Y-m-d\TH:i', $dish['expiry']);
+                    if ($expiry && $expiry < $now) {
+                        $skip = true;
+                        break;
+                    }
+                }
             }
-          } else {
-            echo "Invalid";
-          }
-        ?>
-      </td>
-      <td><?= htmlspecialchars($row['donation_datetime']) ?></td>
-      <td><?= htmlspecialchars($row['instructions']) ?></td>
-      <td><?= $row['is_picked'] ? '<span class="picked">Picked</span>' : 'Pending' ?></td>
-      <td>
-        <?php if (!$row['is_picked']): ?>
-          <form method="POST" action="mark_picked.php">
-            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-            <button class="btn" type="submit">Mark Picked</button>
-          </form>
-        <?php endif; ?>
-      </td>
-    </tr>
+        }
+
+        if ($skip) continue;
+      ?>
+      <tr>
+        <td><?= htmlspecialchars($row['name']) ?> (<?= htmlspecialchars($row['role']) ?>)</td>
+        <td><?= htmlspecialchars($row['address']) ?></td>
+        <td><?= htmlspecialchars($row['contact']) ?></td>
+        <td><?= htmlspecialchars($row['phone']) ?></td>
+        <td><?= htmlspecialchars($row['email']) ?></td>
+        <td>
+          <?php
+            $index = 1;
+            foreach ($dishes as $dish) {
+              echo "<b>{$index}. " . htmlspecialchars($dish['name']) . "</b><br>";
+              echo "Type: " . htmlspecialchars($dish['type']) . " | ";
+              echo "Qty: " . htmlspecialchars($dish['quantity']) . "<br>";
+              echo "Packaging: " . htmlspecialchars($dish['packing']) . "<br>";
+              echo "Expiry: " . str_replace("T", " ", htmlspecialchars($dish['expiry'])) . "<br><br>";
+              $index++;
+            }
+          ?>
+        </td>
+        <td><?= htmlspecialchars($row['pickup_time']) ?></td>
+        <td><?= nl2br(htmlspecialchars($row['instructions'])) ?></td>
+        <td><?= $row['is_picked'] ? '<span class="picked">Picked</span>' : 'Pending' ?></td>
+        <td>
+          <?php if (!$row['is_picked']): ?>
+            <form method="POST" action="mark_picked.php">
+              <input type="hidden" name="id" value="<?= $row['id'] ?>">
+              <button class="btn" type="submit">Mark Picked</button>
+            </form>
+          <?php endif; ?>
+        </td>
+      </tr>
     <?php endwhile; ?>
   </table>
 
