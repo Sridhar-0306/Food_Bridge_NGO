@@ -14,17 +14,15 @@ $offset = ($page - 1) * $limit;
 $filter = $_GET['filter'] ?? 'active';
 $where = "WHERE 1=1";
 
-// Filter logic (picked/unpicked only; expiry handled below)
+// Filter logic (based on picked/unpicked only)
 if ($filter === 'picked') {
     $where .= " AND is_picked = 1";
 } elseif ($filter === 'active') {
     $where .= " AND is_picked = 0";
 }
 
-// Fetch donations
+// Fetch all matching donations
 $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC");
-
-// Current datetime for expiry check
 $now = new DateTime();
 ?>
 <!DOCTYPE html>
@@ -73,24 +71,22 @@ $now = new DateTime();
     </tr>
     <?php while ($row = $result->fetch_assoc()): ?>
       <?php
-        // Decode dishes
         $dishes = json_decode($row['dishes'], true);
-        $skip = false;
+        $expired = false;
 
-        // Check for expired items
         if (is_array($dishes)) {
             foreach ($dishes as $dish) {
                 if (!empty($dish['expiry'])) {
                     $expiry = DateTime::createFromFormat('Y-m-d\TH:i', $dish['expiry']);
                     if ($expiry && $expiry < $now) {
-                        $skip = true;
+                        $expired = true;
                         break;
                     }
                 }
             }
         }
 
-        if ($skip) continue;
+        if ($expired) continue;
       ?>
       <tr>
         <td><?= htmlspecialchars($row['name']) ?> (<?= htmlspecialchars($row['role']) ?>)</td>
@@ -106,7 +102,11 @@ $now = new DateTime();
               echo "Type: " . htmlspecialchars($dish['type']) . " | ";
               echo "Qty: " . htmlspecialchars($dish['quantity']) . "<br>";
               echo "Packaging: " . htmlspecialchars($dish['packing']) . "<br>";
-              echo "Expiry: " . str_replace("T", " ", htmlspecialchars($dish['expiry'])) . "<br><br>";
+              echo "Expiry: " . str_replace("T", " ", htmlspecialchars($dish['expiry'])) . "<br>";
+              if (!empty($dish['description'])) {
+                echo "Description: " . htmlspecialchars($dish['description']) . "<br>";
+              }
+              echo "<br>";
               $index++;
             }
           ?>
@@ -126,14 +126,5 @@ $now = new DateTime();
     <?php endwhile; ?>
   </table>
 
-  <?php if ($pages > 1): ?>
-    <div style="margin-top: 20px;">
-      <?php for ($i = 1; $i <= $pages; $i++): ?>
-        <a href="?page=<?= $i ?>&filter=<?= $filter ?>" style="margin-right: 8px; color: gold;">
-          <?= $i ?>
-        </a>
-      <?php endfor; ?>
-    </div>
-  <?php endif; ?>
 </body>
 </html>
