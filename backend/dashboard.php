@@ -111,7 +111,17 @@ $now = new DateTime();
             }
           ?>
         </td>
-        <td><?= $row['pickup_time'] ? htmlspecialchars($row['pickup_time']) : '' ?></td>
+        <td>
+          <?php
+            if ($row['pickup_time']) {
+              $utc = new DateTime($row['pickup_time'], new DateTimeZone('UTC'));
+              $utc->setTimezone(new DateTimeZone('Asia/Kolkata'));
+              echo htmlspecialchars($utc->format('Y-m-d H:i:s'));
+            } else {
+              echo '';
+            }
+          ?>
+        </td>
         <td><?= nl2br(htmlspecialchars($row['instructions'])) ?></td>
         <td><?= $row['is_picked'] ? '<span class="picked">Picked</span>' : 'Pending' ?></td>
         <td>
