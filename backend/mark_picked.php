@@ -10,7 +10,9 @@ require 'connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = (int)$_POST['id'];
-    $conn->query("UPDATE system SET is_picked = 1 WHERE id = $id");
+    
+    // Update is_picked and set pickup_time to current time
+    $conn->query("UPDATE system SET is_picked = 1, pickup_time = NOW() WHERE id = $id");
 }
 
 header("Location: dashboard.php");
