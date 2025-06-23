@@ -722,7 +722,7 @@ document.getElementById("review-btn").addEventListener("click", function () {
     expiry: item.expiry,
   })),
   donation_date: new Date().toISOString(),
-  pickup_time: new Date().toISOString(),   // ✅ added
+  pickup_time: new Date().toLocaleString('sv-SE').replace(' ', 'T')
   instructions: formData.donation.instructions
 };
 
