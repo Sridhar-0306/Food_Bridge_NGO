@@ -722,7 +722,10 @@ document.getElementById("review-btn").addEventListener("click", function () {
     expiry: item.expiry,
   })),
   donation_date: new Date().toISOString(),
-  pickup_time: new Date().toLocaleString('sv-SE').replace(' ', 'T')
+  const now = new Date();
+const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in ms
+const istTime = new Date(now.getTime() + istOffset);
+payload.pickup_time = istTime.toISOString().slice(0, 19).replace('T', ' ');
   instructions: formData.donation.instructions
 };
 
