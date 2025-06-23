@@ -25,6 +25,7 @@ $email = $conn->real_escape_string($data['email'] ?? '');
 $instructions = $conn->real_escape_string($data['instructions'] ?? '');
 $dishes = $conn->real_escape_string(json_encode($data['dishes'] ?? []));
 $donation_datetime = $conn->real_escape_string($data['donation_date'] ?? date('Y-m-d H:i:s'));
+$pickup_time = $conn->real_escape_string($data['pickup_time'] ?? date('Y-m-d H:i:s'));
 
 // Insert into database
 $sql = "INSERT INTO system (
