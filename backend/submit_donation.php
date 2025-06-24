@@ -25,11 +25,16 @@ $email = $conn->real_escape_string($data['email'] ?? '');
 $instructions = $conn->real_escape_string($data['instructions'] ?? '');
 $dishes = $conn->real_escape_string(json_encode($data['dishes'] ?? []));
 $donation_datetime = $conn->real_escape_string($data['donation_date'] ?? date('Y-m-d H:i:s'));
+$submitted_at = $conn->real_escape_string($data['submitted_at'] ?? date('Y-m-d H:i:s')); // ✅ submitted_at from frontend
 
 // Insert into database
-$sql = "INSERT INTO system (role, name, address, contact, phone, email, instructions, dishes, donation_datetime)
-VALUES ('$role', '$name', '$address', '$contact', '$phone', '$email', '$instructions', '$dishes', '$donation_datetime')
-";
+$sql = "INSERT INTO system (
+    role, name, address, contact, phone, email,
+    instructions, dishes, donation_datetime, submitted_at
+) VALUES (
+    '$role', '$name', '$address', '$contact', '$phone', '$email',
+    '$instructions', '$dishes', '$donation_datetime', '$submitted_at'
+)";
 
 // Execute query
 if ($conn->query($sql)) {
