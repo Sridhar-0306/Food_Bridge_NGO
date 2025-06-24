@@ -13,7 +13,7 @@ fputcsv($output, [
     'Status', 'Pickup Time (IST)', 'Submitted At (IST)'
 ]);
 
-// Fetch all rows (no filtering)
+// Fetch all records (no filters)
 $result = $conn->query("SELECT * FROM system ORDER BY submitted_at DESC");
 
 while ($row = $result->fetch_assoc()) {
