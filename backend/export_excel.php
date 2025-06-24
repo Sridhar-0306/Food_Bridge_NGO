@@ -6,7 +6,7 @@ header('Content-Disposition: attachment;filename="donations.csv"');
 
 $output = fopen('php://output', 'w');
 
-// Updated CSV Headers (removed Preferred Date/Time)
+// CSV Headers
 fputcsv($output, [
     'Org Type', 'Org Name', 'Address', 'Contact Person', 'Phone',
     'Email', 'Dishes (Readable)', 'Instructions',
@@ -34,7 +34,7 @@ while ($row = $result->fetch_assoc()) {
         $formattedDishes = 'Invalid dish data';
     }
 
-    // Convert pickup_time and submitted_at to IST (Asia/Kolkata)
+    // Convert pickup_time from UTC to IST
     $pickupIST = '';
     if (!empty($row['pickup_time'])) {
         $pickup = new DateTime($row['pickup_time'], new DateTimeZone('UTC'));
@@ -42,12 +42,8 @@ while ($row = $result->fetch_assoc()) {
         $pickupIST = $pickup->format('Y-m-d H:i:s');
     }
 
-    $submittedIST = '';
-    if (!empty($row['submitted_at'])) {
-        $submit = new DateTime($row['submitted_at'], new DateTimeZone('UTC'));
-        $submit->setTimezone(new DateTimeZone('Asia/Kolkata'));
-        $submittedIST = $submit->format('Y-m-d H:i:s');
-    }
+    // Submitted time is already in IST — use directly
+    $submittedIST = $row['submitted_at'] ?? '';
 
     fputcsv($output, [
         $row['role'],
