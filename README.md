@@ -35,7 +35,7 @@ A complete food donation platform to collect, manage, and track food contributio
 ## Live Links
 
 - **Donation Form:**  
-  https://food-bridge-ngo.onrender.com/public/index.html
+  https://food-bridge-ngo.onrender.com
 
 - **Admin Dashboard:**  
   https://food-bridge-ngo.onrender.com/backend/dashboard.php
