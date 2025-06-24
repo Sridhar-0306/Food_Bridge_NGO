@@ -23,7 +23,7 @@ if ($filter === 'picked') {
 
 // Fetch donations
 $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC");
-$now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ IST time
+$now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ current time in IST
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +32,7 @@ $now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ IST time
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NGO Admin Dashboard</title>
   <style>
-    body { background: #111; color: #fff; font-family: Arial; padding: 20px; }
+    body { background: #111; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
     h2 { color: gold; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #444; padding: 10px; text-align: left; vertical-align: top; }
@@ -77,7 +77,8 @@ $now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ IST time
         if (is_array($dishes)) {
             foreach ($dishes as $dish) {
                 if (!empty($dish['expiry'])) {
-                    $expiry = DateTime::createFromFormat('Y-m-d\TH:i', $dish['expiry']);
+                    // ✅ interpret expiry as IST (donor input time)
+                    $expiry = DateTime::createFromFormat('Y-m-d\TH:i', $dish['expiry'], new DateTimeZone('Asia/Kolkata'));
                     if ($expiry && $expiry < $now) {
                         $expired = true;
                         break;
@@ -135,6 +136,5 @@ $now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ IST time
       </tr>
     <?php endwhile; ?>
   </table>
-
 </body>
 </html>
