@@ -6,14 +6,14 @@ header('Content-Disposition: attachment;filename="donations.csv"');
 
 $output = fopen('php://output', 'w');
 
-// CSV Headers
+// Updated CSV Headers (removed Preferred Date/Time)
 fputcsv($output, [
     'Org Type', 'Org Name', 'Address', 'Contact Person', 'Phone',
-    'Email', 'Dishes (Readable)', 'Preferred Date/Time', 'Instructions',
+    'Email', 'Dishes (Readable)', 'Instructions',
     'Status', 'Pickup Time (IST)', 'Submitted At (IST)'
 ]);
 
-// Fetch all records (no filters)
+// Fetch all donations
 $result = $conn->query("SELECT * FROM system ORDER BY submitted_at DESC");
 
 while ($row = $result->fetch_assoc()) {
@@ -34,19 +34,19 @@ while ($row = $result->fetch_assoc()) {
         $formattedDishes = 'Invalid dish data';
     }
 
-    // Convert pickup_time and submitted_at to IST
+    // Convert pickup_time and submitted_at to IST (Asia/Kolkata)
     $pickupIST = '';
     if (!empty($row['pickup_time'])) {
-        $utc = new DateTime($row['pickup_time'], new DateTimeZone('UTC'));
-        $utc->setTimezone(new DateTimeZone('Asia/Kolkata'));
-        $pickupIST = $utc->format('Y-m-d H:i:s');
+        $pickup = new DateTime($row['pickup_time'], new DateTimeZone('UTC'));
+        $pickup->setTimezone(new DateTimeZone('Asia/Kolkata'));
+        $pickupIST = $pickup->format('Y-m-d H:i:s');
     }
 
     $submittedIST = '';
     if (!empty($row['submitted_at'])) {
-        $utc = new DateTime($row['submitted_at'], new DateTimeZone('UTC'));
-        $utc->setTimezone(new DateTimeZone('Asia/Kolkata'));
-        $submittedIST = $utc->format('Y-m-d H:i:s');
+        $submit = new DateTime($row['submitted_at'], new DateTimeZone('UTC'));
+        $submit->setTimezone(new DateTimeZone('Asia/Kolkata'));
+        $submittedIST = $submit->format('Y-m-d H:i:s');
     }
 
     fputcsv($output, [
@@ -57,7 +57,6 @@ while ($row = $result->fetch_assoc()) {
         $row['phone'],
         $row['email'],
         $formattedDishes,
-        $row['donation_datetime'],
         $row['instructions'],
         $row['is_picked'] ? 'Picked' : 'Pending',
         $pickupIST,
