@@ -6,13 +6,19 @@ A complete food donation platform to collect, manage, and track food contributio
 
 ## Features
 
-- Multi-step food donation form with dynamic fields
-- NGO admin login and secure dashboard
-- View active and picked donations
-- Auto-hide expired donations from the dashboard
-- Mark donations as picked with timestamp
-- Export donations to Excel with full details
-- Accurate IST timestamps for submissions and pickups
+- Multi-step donation form with dynamic dish entries and validation
+- Supports multiple organization types: restaurants, events, caterers
+- Real-time form submission using JSON and `fetch()` API
+- Secure admin login with session-based access control
+- NGO dashboard with Active and Picked donation tabs
+- Expired food items auto-removed from all views
+- View detailed dish info: type, quantity, packing, expiry, description
+- Mark donations as picked with accurate IST timestamp
+- Export all donations to Excel in a clean, readable format
+- Submitted and pickup times tracked and stored in IST
+- Fully responsive UI and lightweight frontend
+- MySQL database integration with well-structured schema
+- Deployed PHP backend with working API endpoints on Render
 
 ---
 
