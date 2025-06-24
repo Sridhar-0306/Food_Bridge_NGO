@@ -14,16 +14,16 @@ $offset = ($page - 1) * $limit;
 $filter = $_GET['filter'] ?? 'active';
 $where = "WHERE 1=1";
 
-// Filter logic (based on picked/unpicked only)
+// Filter logic
 if ($filter === 'picked') {
     $where .= " AND is_picked = 1";
 } elseif ($filter === 'active') {
     $where .= " AND is_picked = 0";
 }
 
-// Fetch all matching donations
+// Fetch donations
 $result = $conn->query("SELECT * FROM system $where ORDER BY submitted_at DESC");
-$now = new DateTime();
+$now = new DateTime('now', new DateTimeZone('Asia/Kolkata')); // ✅ IST time
 ?>
 <!DOCTYPE html>
 <html lang="en">
